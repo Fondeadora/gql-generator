@@ -11,18 +11,18 @@ void main(List<String> arguments) async {
     /// configura en el {parser} la información de los argumentos
     final result = parser.parse(arguments);
 
-    print('📖 leyendo {schema.graphql}...');
+    print('📖 leyendo {schema.graphql}');
 
     /// lee el archivo envíado en el {path}
     final reader = SchemaReader(result['path']);
     final tokens = await reader.readType();
 
-    print('🚜 extrayendo objetos {type} del esquema...');
+    print('🚜 extrayendo objetos {type} del esquema');
 
     final extractor = TypeExtractor.instance;
     final types = extractor.parsedTypesFrom(tokens);
 
-    print('📝 generando archivos...');
+    print('📝 generando archivos');
 
     /// genera los tipos en la ruta del argumento
     final generator = TypeGenerator(types, result['path'].split('/')[0]);
@@ -32,9 +32,9 @@ void main(List<String> arguments) async {
 
     stopwatch.stop();
     final milliseconds = stopwatch.elapsed.inMilliseconds;
-    print('⏱ ejecutado en $milliseconds millisegundos');
+    print('🎯 ejecutado en $milliseconds millisegundos');
   } catch (e) {
     print(e);
-    print('⚰️ algo salió mal...');
+    print('⚰️ algo salió mal');
   }
 }

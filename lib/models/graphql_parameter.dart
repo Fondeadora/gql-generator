@@ -1,13 +1,18 @@
+import 'package:gql_generator/models/object_cast.dart';
+
 class GraphQLParameter {
-  const GraphQLParameter(this.name, {this.type});
+  GraphQLParameter(this.name, this._type, this.cast);
 
   final String name;
-  final String? type;
+  final String _type;
+  final ObjectCast cast;
+
+  String get type {
+    if (cast.isFunctionType) return _type.trim();
+    return _type.trim().replaceAll(RegExp(r'(!|\[|\])'), '');
+  }
 
   Map<String, String> toMap() {
-    final baseMap = {'name': name};
-
-    if (type != null) return {...baseMap, 'type': type!};
-    return baseMap;
+    return {'name': name, 'type': type};
   }
 }

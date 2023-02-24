@@ -1,3 +1,5 @@
+import 'package:gql_generator/models/object_cast.dart';
+
 import 'extended_string.dart';
 import 'graphql_function.dart';
 import 'graphql_parameter.dart';
@@ -16,7 +18,7 @@ class FunctionParser {
         /// quita los paréntesis y los separa por el nombre del objeto
         /// y el objeto
         final clean = param.replaceAll(RegExp(r'[(]|[)]'), '').paramMetadata;
-        return GraphQLParameter(clean[0], type: clean[1]);
+        return GraphQLParameter(clean[0], clean[1], ObjectCast.functionType);
       }).toList();
 
       return parsedParams;

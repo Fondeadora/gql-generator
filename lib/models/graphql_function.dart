@@ -25,7 +25,7 @@ class GraphQLFunction extends GraphQLType {
     return literal.isEmpty ? '' : '($literal)';
   }
 
-  String get literal {
+  String get function {
     return '${functionType.toLowerCase()} $name$_functionParamsLiteral {\n  $name$_paramsLiteral {\n    ...$result\n  }\n}';
   }
 

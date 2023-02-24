@@ -115,8 +115,13 @@ class TypeExtractor {
         return FunctionParser(identifiedType.name, elements).function;
       }
 
-      final attributes = elements.map((literal) {
-        return GraphQLParameter(literal.split(':')[0]);
+      final attributes = elements.map((attribute) {
+        final splittedAttribute = attribute.split(':');
+        return GraphQLParameter(
+          splittedAttribute[0],
+          splittedAttribute[1],
+          cast,
+        );
       });
 
       return GraphQLFragment(t[0].split(' ')[1], attributes.toList());

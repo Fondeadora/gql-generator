@@ -6,9 +6,13 @@ class GraphQLFragment extends GraphQLType {
 
   final List<GraphQLParameter> _attributes;
 
-  String get attributes => _attributes.map((a) => a.name).join('\n  ');
+  String get attributes {
+    return _attributes.map((a) {
+      return '${a.name} {\n    ...${a.type}\n  }';
+    }).join('\n  ');
+  }
 
-  String get literal {
+  String get type {
     return 'fragment $name on $name {\n  $attributes\n}';
   }
 }
