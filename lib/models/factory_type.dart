@@ -1,7 +1,7 @@
 import 'object_cast.dart';
 
-class FactoryType {
-  const FactoryType(this.type);
+class Type {
+  const Type(this.type);
 
   final List<String> type;
 

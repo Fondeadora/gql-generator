@@ -1,5 +1,5 @@
 class ExtractedNodes {
-  const ExtractedNodes(this.type, this.literals);
+  const ExtractedNodes(this.type, this.tokens);
 
   /// este atributo esta conformado por una lista de cadenas que conforman al
   /// tipo.
@@ -9,9 +9,9 @@ class ExtractedNodes {
 
   /// lista de literales válidas utilizada para identificar los tipos entre cada
   /// iteración.
-  final List<String> literals;
+  final List<String> tokens;
 
   Map<String, List<String>> toMap() {
-    return {'type': type, 'literals': literals};
+    return {'type': type, 'tokens': tokens};
   }
 }

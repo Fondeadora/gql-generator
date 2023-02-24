@@ -10,67 +10,77 @@ class TypeExtractor {
 
   static TypeExtractor instance = TypeExtractor._();
 
-  /// identifica el inicio de un tipo
   RegExp get _initTypeExp => RegExp('(type.+{)');
 
-  /// identifica el cierre de un tipo
   RegExp get _closeExp => RegExp('(})');
 
-  /// obtiene una lista de tipos
-  List<List<String>> _typesFrom(List<String> literals) {
-    /// manda una lista de tipos, obtenidos de la lista de nodos extraídos
-    return _getTypes(literals).map((e) => e.type).toList();
+  /// regresa una lista con los {token} en forma de lista de cadena
+  ///
+  /// esto quiere decir que cada lista de cadena representa un {token} para
+  /// formar un {type} válido
+  ///
+  /// se recupera de esta forma para poder sacar los parámetros de las
+  /// consultas y las mutaciones
+  List<List<String>> _typesFrom(List<String> tokens) {
+    return _getTypes(tokens).map((e) => e.type).toList();
   }
 
-  /// se utiliza principalmente para hacer recursión en las literales y
-  /// recuperar los nodos entre cada iteración.
-  ///
-  /// los nodos están compuestos por literales válidas y un tipo.
   List<ExtractedNodes> _getTypes(
-    List<String> literals, [
+    List<String> tokens, [
     List<ExtractedNodes> nodes = const [],
   ]) {
-    if (literals.isEmpty) return nodes;
+    if (tokens.isEmpty) return nodes;
 
-    /// si la literal inicial no contiene un formato válido, se corta de la
-    /// lista de literales y se regresa la misma función con el remanente.
+    /// si es diferente del inicio común de los {type}: `type <objeto> {`;
+    /// quita el {token} de la lista de {token}
     ///
-    /// esta validación permite obtener literales válidas que sean fácilmente
-    /// identificables para generar un tipo.
-    if (!_initTypeExp.hasMatch(literals[0])) {
-      final newLiterals = literals.getRange(1, literals.length);
-      return _getTypes(newLiterals.toList(), nodes);
+    /// sirve como filtro para quitar {token} inválidos
+    if (!_initTypeExp.hasMatch(tokens[0])) {
+      final newTokens = tokens.getRange(1, tokens.length);
+      return _getTypes(newTokens.toList(), nodes);
     }
 
-    final node = _extractNode(literals);
+    /// en caso de que el {token} sea válido: se extraer el {node} de la
+    /// lista completa de {token} envíados
+    final node = _extractNode(tokens);
 
-    /// mediante el regreso de la misma función con los nodos generados y el
-    /// nuevo es como se genera el tipo.
-    return _getTypes(node.literals, [...nodes, node]);
+    return _getTypes(
+
+        /// ahora, los {token} a evaluar no contienen los {token} extraídos
+        node.tokens,
+
+        /// en su lugar, se adjunta a la lista de nodos extraídos, el nodo
+        /// con información de los últimos {token} recuperados, que son los
+        /// mismos que generan un {type} válido
+        [...nodes, node]);
   }
 
-  /// obtiene un tipo mediante la identificación de un inicio y un cierre
-  /// válido.
-  ExtractedNodes _extractNode(List<String> literals) {
-    /// encuentra el índice de un inicio válido.
-    final start = literals.indexWhere((l) => _initTypeExp.hasMatch(l));
+  ExtractedNodes _extractNode(List<String> tokens) {
+    /// encuentra el índice de un inicio válido
+    final start = tokens.indexWhere((l) => _initTypeExp.hasMatch(l));
 
-    /// encuentra el índice de un cierre válido.
-    final end = literals.indexWhere((l) => _closeExp.hasMatch(l)) + 1;
+    /// encuentra el índice de un cierre válido
+    final end = tokens.indexWhere((l) => _closeExp.hasMatch(l)) + 1;
 
-    /// obtiene un tipo a través de los índices.
-    final type = literals.getRange(start, end).toList();
-    literals.removeRange(start, end);
+    /// obtiene un tipo a través de los índices
+    final type = tokens.getRange(start, end).toList();
 
-    /// regresa un nodo conformado por el tipo y la literal después de haber
-    /// extraído los elementos que conforman la tipo.
-    return ExtractedNodes(type, literals);
+    /// finalmente, eliminar los {token} recuperados para volver a evaluar
+    /// los otros {type} válidos
+    tokens.removeRange(start, end);
+
+    /// regresa un nodo conformado por el {type} recuperado y los {token} aún
+    /// no procesados sin la información del {type} actual
+    return ExtractedNodes(type, tokens);
   }
 
-  List<Object> parsedTypesFrom(List<String> literals) {
+  /// recibe una lista de {token}.
+  ///
+  /// cada token es una línea filtrada y cortada del {schema} de {GraphQL}.
+  List<Object> parsedTypesFrom(List<String> tokens) {
     List<Object> types = [];
 
-    _rawTypeFrom(literals).forEach((type) {
+    _rawTypeFrom(tokens).forEach((type) {
       if (type is List<GraphQLFunction>) {
         for (GraphQLFunction functionType in type) {
           types.add(functionType);
@@ -85,18 +95,27 @@ class TypeExtractor {
     return types;
   }
 
-  List<Object> _rawTypeFrom(List<String> literals) {
-    return _typesFrom(literals).map((t) {
-      final identifiedType = FactoryType(t);
+  List<Object> _rawTypeFrom(List<String> tokens) {
+    return _typesFrom(tokens).map((t) {
+      /// cada elemento {t} no es nada más que una lista con {token} válidos
+      /// para generar un {type}
+      final identifiedType = Type(t);
+
+      /// se encarga de designar que tipo de enumerador {ObjectType} es
       final cast = identifiedType.cast;
 
-      final literals = t.getRange(1, t.length - 1).toList();
+      /// esta lista de elementos puede contener los parámetros necesarios
+      /// para una mutación o consulta; o, los atributos de un fragmento
+      final elements = t.getRange(1, t.length - 1).toList();
 
+      /// mediante el {cast} se determina cual de estos dos {type} es:
+      /// - consulta o mutación, o
+      /// - fragmento
       if (cast.isFunctionType) {
-        return FunctionParser(identifiedType.name, literals).function;
+        return FunctionParser(identifiedType.name, elements).function;
       }
 
-      final attributes = literals.map((literal) {
+      final attributes = elements.map((literal) {
         return GraphQLParameter(literal.split(':')[0]);
       });
 

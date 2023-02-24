@@ -3,16 +3,18 @@ import 'graphql_function.dart';
 import 'graphql_parameter.dart';
 
 class FunctionParser {
-  const FunctionParser(this.functionType, this.functionLiterals);
+  const FunctionParser(this.functionType, this.tokens);
 
   final String functionType;
-  final List<String> functionLiterals;
+  final List<String> tokens;
 
-  List<GraphQLParameter> _extractParams(String? paramsLiteral) {
-    if (paramsLiteral != null) {
-      final rawParams = paramsLiteral.split(',').map((e) => e.trim()).toList();
+  List<GraphQLParameter> _extractParams(String? paramsToken) {
+    if (paramsToken != null) {
+      final rawParams = paramsToken.split(',').map((e) => e.trim()).toList();
 
       final parsedParams = rawParams.map((param) {
+        /// quita los paréntesis y los separa por el nombre del objeto
+        /// y el objeto
         final clean = param.replaceAll(RegExp(r'[(]|[)]'), '').paramMetadata;
         return GraphQLParameter(clean[0], type: clean[1]);
       }).toList();
@@ -24,17 +26,20 @@ class FunctionParser {
   }
 
   List<GraphQLFunction> get function {
-    return functionLiterals.map<GraphQLFunction>((literal) {
+    return tokens.map<GraphQLFunction>((token) {
       final paramsExp = RegExp(r'\(([^\)]+)\)');
 
-      final remainingLiterals = literal.replaceAll(paramsExp, '').paramMetadata;
-      final params = _extractParams(paramsExp.stringMatch(literal));
+      /// devuelve el nombre de la función y el objeto de retorno
+      final remainingTokens = token.replaceAll(paramsExp, '').paramMetadata;
+
+      /// obtiene una lista de parámetros, en caso de contenerlos
+      final params = _extractParams(paramsExp.stringMatch(token));
 
       return GraphQLFunction(
         functionType,
-        remainingLiterals[0],
+        remainingTokens[0],
         params,
-        remainingLiterals[1],
+        remainingTokens[1],
       );
     }).toList();
   }
