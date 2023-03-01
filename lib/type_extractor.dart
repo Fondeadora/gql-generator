@@ -96,7 +96,14 @@ class TypeExtractor {
   }
 
   List<Object> _rawTypeFrom(List<String> tokens) {
-    return _typesFrom(tokens).map((t) {
+    final types = _typesFrom(tokens);
+
+    final validFragments = types
+        .where((t) => Type(t).name == 'Fragment')
+        .map((e) => e[0].split(' ')[1])
+        .toList();
+
+    return types.map((t) {
       /// cada elemento {t} no es nada más que una lista con {token} válidos
       /// para generar un {type}
       final identifiedType = Type(t);
@@ -117,6 +124,7 @@ class TypeExtractor {
 
       final attributes = elements.map((attribute) {
         final splittedAttribute = attribute.split(':');
+
         return GraphQLParameter(
           splittedAttribute[0],
           splittedAttribute[1],
@@ -124,7 +132,11 @@ class TypeExtractor {
         );
       });
 
-      return GraphQLFragment(t[0].split(' ')[1], attributes.toList());
+      return GraphQLFragment(
+        t[0].split(' ')[1],
+        attributes.toList(),
+        validFragments,
+      );
     }).toList();
   }
 }

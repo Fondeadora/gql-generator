@@ -2,13 +2,18 @@ import 'graphql_parameter.dart';
 import 'graphql_type.dart';
 
 class GraphQLFragment extends GraphQLType {
-  GraphQLFragment(String name, this._attributes) : super(name);
+  GraphQLFragment(String name, this._attributes, this.validFragments)
+      : super(name);
 
   final List<GraphQLParameter> _attributes;
+  final List<String> validFragments;
 
   String get attributes {
     return _attributes.map((a) {
-      return '${a.name} {\n    ...${a.type}\n  }';
+      final validType = validFragments.contains(a.type);
+      final typeLiteral = validType ? ' {\n    ...${a.type}\n  }' : '';
+
+      return '${a.name}$typeLiteral';
     }).join('\n  ');
   }
 
