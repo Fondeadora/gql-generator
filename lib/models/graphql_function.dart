@@ -13,7 +13,7 @@ class GraphQLFunction extends GraphQLType {
   final List<GraphQLParameter> params;
   final String _result;
 
-  String get result => _result.replaceAll('!', '');
+  String get result => _result.replaceAll(RegExp(r'(!|\[|\])'), '');
 
   String get _functionParamsLiteral {
     final literal = params.map((p) => '\$${p.name}: ${p.type}').join(', ');
