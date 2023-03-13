@@ -119,7 +119,11 @@ class TypeExtractor {
       /// - consulta o mutación, o
       /// - fragmento
       if (cast.isFunctionType) {
-        return FunctionParser(identifiedType.name, elements).function;
+        return FunctionParser(
+          identifiedType.name,
+          elements,
+          validFragments,
+        ).function;
       }
 
       final attributes = elements.map((attribute) {

@@ -7,11 +7,13 @@ class GraphQLFunction extends GraphQLType {
     String name,
     this.params,
     this._result,
+    this.validFragments,
   ) : super(name);
 
   final String functionType;
   final List<GraphQLParameter> params;
   final String _result;
+  final List<String> validFragments;
 
   String get result => _result.replaceAll(RegExp(r'(!|\[|\])'), '');
 
@@ -26,7 +28,10 @@ class GraphQLFunction extends GraphQLType {
   }
 
   String get function {
-    return '${functionType.toLowerCase()} $name$_functionParamsLiteral {\n  $name$_paramsLiteral {\n    ...$result\n  }\n}';
+    final validType = validFragments.contains(result);
+    final typeLiteral = validType ? ' {\n    ...$result\n  }' : '';
+
+    return '${functionType.toLowerCase()} $name$_functionParamsLiteral {\n  $name$_paramsLiteral$typeLiteral\n}';
   }
 
   Map<String, dynamic> toMap() {

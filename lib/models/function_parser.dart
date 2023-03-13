@@ -5,10 +5,11 @@ import 'graphql_function.dart';
 import 'graphql_parameter.dart';
 
 class FunctionParser {
-  const FunctionParser(this.functionType, this.tokens);
+  const FunctionParser(this.functionType, this.tokens, this.validFragments);
 
   final String functionType;
   final List<String> tokens;
+  final List<String> validFragments;
 
   List<GraphQLParameter> _extractParams(String? paramsToken) {
     if (paramsToken != null) {
@@ -42,6 +43,7 @@ class FunctionParser {
         remainingTokens[0],
         params,
         remainingTokens[1],
+        validFragments,
       );
     }).toList();
   }

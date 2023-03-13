@@ -32,7 +32,7 @@ void main(List<String> arguments) async {
 
     stopwatch.stop();
     final milliseconds = stopwatch.elapsed.inMilliseconds;
-    print('🎯 ejecutado en $milliseconds millisegundos');
+    print('🎯 ejecutado en ${milliseconds / 1000} segundos');
   } catch (e) {
     print(e);
     print('⚰️ algo salió mal');
