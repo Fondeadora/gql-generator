@@ -1,3 +1,7 @@
+## 1.3.0
+
+- Mejora en la asignación de objetos en los tipos
+
 ## 1.2.0
 
 - Mejora en la validación de fragmentos válidos.
